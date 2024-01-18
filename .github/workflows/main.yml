@@ -15,6 +15,18 @@ jobs:
       - name: Install Zip
         run: sudo apt-get install zip
 
+      - name: Increment Minor Version
+        run: |
+            FILE=wordpress-utils-plugin.php 
+            VERSION=$(grep -oP 'Version: \K[\d.]+' $FILE)
+            MAJOR=$(echo $VERSION | cut -d. -f1)
+            MINOR=$(echo $VERSION | cut -d. -f2)
+            PATCH=$(echo $VERSION | cut -d. -f3)
+            NEW_MINOR=$((MINOR+1))
+            NEW_VERSION="$MAJOR.$NEW_MINOR.$PATCH"
+            sed -i "s/Version: $VERSION/Version: $NEW_VERSION/" $FILE
+            echo "Updated version to $NEW_VERSION"
+
       - name: Zip the Plugin
         run: |
           pwd
