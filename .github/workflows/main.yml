@@ -16,7 +16,10 @@ jobs:
         run: sudo apt-get install zip
 
       - name: Zip the Plugin
-        run: zip -r wordpress-utils-plugin.zip .
+        run: |
+          pwd
+          ls -al
+          zip -r -j wordpress-utils-plugin.zip .
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
