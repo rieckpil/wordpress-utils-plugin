@@ -1,14 +1,31 @@
 <?php
 /*
-Plugin Name: Alert on D Key
-Description: Shows an alert box when the 'D' key is pressed.
+Plugin Name: WordPress Utils Plugin
+Description: Various utility functions for WordPress.
 Version: 1.0
 Author: Philip Riecks
 */
 
-add_action('admin_enqueue_scripts', 'alert_on_d_key_enqueue_script');
+add_action('admin_enqueue_scripts', 'enqueue_functions_script');
 
-function alert_on_d_key_enqueue_script() {
-    wp_enqueue_script('alert-on-d-key-js', plugin_dir_url(__FILE__) . 'admin/js/functions.js', array(), '1.0', true);
+function enqueue_functions_script() {
+    wp_enqueue_script('wordpress-utils-plugin-js', plugin_dir_url(__FILE__) . 'admin/js/functions.js', array('jquery'), '1.0', true);
+}
+
+add_action('add_meta_boxes', 'wordcount_add_custom_box');
+
+function wordcount_add_custom_box() {
+    add_meta_box(
+        'wordcount_sectionid',
+        'Word Count',
+        'wordcount_custom_box_html',
+        'post',
+        'side'
+    );
+}
+
+function wordcount_custom_box_html($post) {
+    echo '<div id="wordcount_value">0 words</div>';
+    echo '<button type="button" onclick="wordcount_update()">Update Word Count</button>';
 }
 ?>
