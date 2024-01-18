@@ -34,19 +34,8 @@ jobs:
         with:
           commit_message: 'update plugin to new version [skip ci]'
 
-#      - name: Commit and Push
-#        run: |
-#          git config --global user.name 'Philip Riecks'
-#          git config --global user.email 'mail@philipriecks.de'
-#          git add .
-#          git commit -m "update plugin version to $NEW_VERSION [skip ci]" # Skip CI
-#          git push
-
       - name: Zip the Plugin
-        run: |
-          pwd
-          ls -al
-          zip -r wordpress-utils-plugin.zip .
+        run: zip -r ../wordpress-utils-plugin.zip .
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
