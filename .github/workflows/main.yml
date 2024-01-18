@@ -27,11 +27,23 @@ jobs:
             sed -i "s/Version: $VERSION/Version: $NEW_VERSION/" $FILE
             echo "Updated version to $NEW_VERSION"
 
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'update plugin to new version [skip ci]'
+
+#      - name: Commit and Push
+#        run: |
+#          git config --global user.name 'Philip Riecks'
+#          git config --global user.email 'mail@philipriecks.de'
+#          git add .
+#          git commit -m "update plugin version to $NEW_VERSION [skip ci]" # Skip CI
+#          git push
+
       - name: Zip the Plugin
         run: |
           pwd
           ls -al
-          zip -r -j wordpress-utils-plugin.zip .
+          zip -r wordpress-utils-plugin.zip .
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
