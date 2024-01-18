@@ -35,7 +35,9 @@ jobs:
           commit_message: 'update plugin to new version [skip ci]'
 
       - name: Zip the Plugin
-        run: zip -r ../wordpress-utils-plugin.zip .
+        run: |
+          zip -r ../wordpress-utils-plugin.zip .  -x '*.git*'
+          ls -al
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
