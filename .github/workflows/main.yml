@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Install Zip
         run: sudo apt-get install zip
@@ -19,7 +19,7 @@ jobs:
         run: zip -r wordpress-utils-plugin.zip .
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: wordpress-utils-plugin
           path: wordpress-utils-plugin.zip
