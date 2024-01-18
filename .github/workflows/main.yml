@@ -37,6 +37,7 @@ jobs:
       - name: Zip the Plugin
         run: |
           zip -r ../wordpress-utils-plugin.zip .  -x '*.git*'
+          mv ../wordpress-utils-plugin.zip wordpress-utils-plugin.zip
           ls -al
 
       - name: Upload Artifact
