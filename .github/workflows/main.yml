@@ -1,0 +1,25 @@
+name: Build and Zip Plugin
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Zip
+        run: sudo apt-get install zip
+
+      - name: Zip the Plugin
+        run: zip -r wordpress-utils-plugin.zip .
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: wordpress-utils-plugin
+          path: wordpress-utils-plugin.zip
