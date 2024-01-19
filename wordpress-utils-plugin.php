@@ -110,7 +110,7 @@ function openai_custom_box_html($post)
     }
 
     $twitter_prompt = "Creating engaging Twitter content to summarize the following blog post content. Include some emojis. The audience are Spring developer that want to learn about testing spring boot applications. the url (' . $post_url . ') must be included at the end of the tweet. Each tweet must have a max of 280 characters not more, use maximum three hashtags. Include line breaks in the tweets. Create three different tweet variations:\n" . $post_content;
-    $newsletter_prompt = 'Please summarize the following technical blog article for my newsletter. Each newsletter variation email must have around 400 words and summarize the technical blog article, including a CTA at the end of the email to encourage visiting the article at the given URL (' . $post_url . '). Make sure to include some bullet points, as well as text and line breaks, to make it easy for the reader to grasp. The newsletter ends with "Joyful testing, Philip".  The audience consists of Spring Boot Java developers who need help with testing their Spring Boot applications. They signed up for the blog to receive help, best practices, and testing recipes. Please provide three variations of the newsletter. Each variation comes with a compelling email title (including one suiting emoji) and a description of 100-120 characters. \n' . $post_content;
+    $newsletter_prompt = 'Please summarize the following technical blog article for my newsletter. Each newsletter variation email should have around 400-600 words and summarize the technical blog article, including a CTA at the end of the email to encourage visiting the article at the given URL (' . $post_url . '). Make sure to include some bullet points, as well as text and line breaks, to make it easy for the reader to grasp. The newsletter ends with "Joyful testing, Philip".  The audience consists of Spring Boot Java developers who need help with testing their Spring Boot applications. They signed up for the blog to receive help, best practices, and testing recipes. Please provide three variations of the newsletter. Each variation comes with a compelling email title (including one suiting emoji) and a description of 100-120 characters. \n' . $post_content;
 
     $social_platforms = [
         ['twitter', $twitter_prompt],
@@ -132,7 +132,7 @@ function openai_custom_box_html($post)
             }
         }
 
-        // Display the preview text in the meta box
+        echo '<h3>' . ucfirst($social_platform_name) . '</h3>';
         echo '<textarea id="openai_' . $social_platform_name . '_preview_text" style="width:100%;" rows="4">' . esc_textarea($preview_text) . '</textarea>';
         echo '<i id="copy_' . $social_platform_name . '_to_clipboard" class="fas fa-clipboard" style="cursor: pointer; margin-left: 10px;"></i>';
         echo '<script>
