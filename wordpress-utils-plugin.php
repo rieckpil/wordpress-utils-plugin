@@ -96,71 +96,94 @@ function openai_custom_box_html($post)
 {
     // Check for existing preview text
     $post_content = get_post_field('post_content', $post->ID);
+    $post_id = $post->ID;
+    $post_url = get_permalink($post_id);
 
     if (get_post_status($post->ID) == 'draft') {
+        echo 'No preview text for drafts.';
         return 'No preview text for drafts.';
     }
 
     if (empty($post_content)) {
-        // Return early if the content is empty
+        echo 'No content to generate preview text.';
         return 'No content to generate preview text.';
     }
 
-    $preview_text = get_post_meta($post->ID, 'openai_twitter_preview_text', true);
+    $twitter_prompt = "Creating engaging Twitter content to summarize the following blog post content. Include some emojis. The audience are Spring developer that want to learn about testing spring boot applications. the url (' . $post_url . ') must be included at the end of the tweet. Each tweet must have a max of 280 characters not more, use maximum three hashtags. Include line breaks in the tweets. Create three different tweet variations:\n" . $post_content;
+    $newsletter_prompt = 'Please summarize the following technical blog article for my newsletter. Each newsletter variation email must have around 400 words and summarize the technical blog article, including a CTA at the end of the email to encourage visiting the article at the given URL (' . $post_url . '). Make sure to include some bullet points, as well as text and line breaks, to make it easy for the reader to grasp. The newsletter ends with "Joyful testing, Philip".  The audience consists of Spring Boot Java developers who need help with testing their Spring Boot applications. They signed up for the blog to receive help, best practices, and testing recipes. Please provide three variations of the newsletter. Each variation comes with a compelling email title (including one suiting emoji) and a description of 100-120 characters. \n' . $post_content;
 
-    if (!$preview_text) {
-        // Generate preview text using OpenAI API
-        // Assume you have a function openai_generate_preview_text that does this
-        $preview_text = openai_generate_preview_text($post->post_id);
+    $social_platforms = [
+        ['twitter', $twitter_prompt],
+        ['newsletter', $newsletter_prompt]
+    ];
 
-        if ($preview_text) {
-            update_post_meta($post->ID, 'openai_twitter_preview_text', $preview_text);
+    foreach ($social_platforms as $social_platform) {
+        $social_platform_name = $social_platform[0];
+        $social_platform_prompt = $social_platform[1];
+
+
+        $preview_text = get_post_meta($post->ID, 'openai_'. $social_platform_name . '_preview_text', true);
+
+        if (!$preview_text) {
+            $preview_text = openai_generate_preview_text($post_id, $social_platform_prompt);
+
+            if ($preview_text) {
+                update_post_meta($post->ID, 'openai_'. $social_platform_name . '_preview_text', $preview_text);
+            }
         }
-    }
 
-    // Display the preview text in the meta box
-    echo '<textarea id="openai_twitter_preview_text" style="width:100%;" rows="4">' . esc_textarea($preview_text) . '</textarea>';
-    echo '<i id="copy_to_clipboard" class="fas fa-clipboard" style="cursor: pointer; margin-left: 10px;"></i>';
-    echo '<script>
-            document.getElementById("copy_to_clipboard").addEventListener("click", function() {               
-                var copyText = document.getElementById("openai_twitter_preview_text");
+        // Display the preview text in the meta box
+        echo '<textarea id="openai_' . $social_platform_name . '_preview_text" style="width:100%;" rows="4">' . esc_textarea($preview_text) . '</textarea>';
+        echo '<i id="copy_' . $social_platform_name . '_to_clipboard" class="fas fa-clipboard" style="cursor: pointer; margin-left: 10px;"></i>';
+        echo '<script>
+            document.getElementById("copy_'  . $social_platform_name . '_to_clipboard").addEventListener("click", function() {               
+                var copyText = document.getElementById("openai_' . $social_platform_name . '_preview_text");
                 navigator.clipboard.writeText(copyText.innerHTML);
             });
           </script>';
 
-    echo '<i id="delete_preview_text" class="fas fa-trash" style="cursor: pointer; margin-left: 10px;"></i>';
-    // Add script for AJAX call
-    ?>
-    <script type="text/javascript">
-        jQuery(document).ready(function ($) {
-            $('#delete_preview_text').click(function () {
-                var data = {
-                    'action': 'delete_preview_text',
-                    'post_id': '<?php echo $post->ID; ?>'
-                };
+        echo '<i id="delete_' . $social_platform_name . '_preview_text" class="fas fa-trash" style="cursor: pointer; margin-left: 10px;"></i>';
+        // Add script for AJAX call
+        ?>
+        <script type="text/javascript">
+            jQuery(document).ready(function ($) {
+                $('#delete_<?php echo  $social_platform_name  ?>_preview_text').click(function () {
+                    var data = {
+                        'action': 'delete_<?php echo $social_platform_name ?>_preview_text',
+                        'post_id': '<?php echo $post->ID; ?>'
+                    };
 
-                $.post(ajaxurl, data, function (response) {
-                    $('#openai_twitter_preview_text').val('');
+                    $.post(ajaxurl, data, function (response) {
+                        $('#openai_<?php echo  $social_platform_name  ?>_preview_text').val('');
+                    });
                 });
             });
-        });
-    </script>
-    <?php
+        </script>
+        <?php
+
+    }
 }
 
-add_action('wp_ajax_delete_preview_text', 'delete_preview_text_callback');
+add_action('wp_ajax_delete_twitter_preview_text', 'delete_twitter_preview_text_callback');
+add_action('wp_ajax_delete_newsletter_preview_text', 'delete_newsletter_preview_text_callback');
 
-function delete_preview_text_callback()
-{
+function delete_twitter_preview_text_callback() {
     $post_id = intval($_POST['post_id']);
     delete_post_meta($post_id, 'openai_twitter_preview_text');
 
-    echo 'Preview text deleted';
+    echo 'Twitter preview text deleted';
     wp_die(); // This is required to terminate immediately and return a proper response
 }
 
-function openai_generate_preview_text($post_id)
-{
+function delete_newsletter_preview_text_callback() {
+    $post_id = intval($_POST['post_id']);
+    delete_post_meta($post_id, 'openai_newsletter_preview_text');
+
+    echo 'Newsletter preview text deleted';
+    wp_die(); // This is required to terminate immediately and return a proper response
+}
+
+function openai_generate_preview_text($post_id, $prompt) {
     $api_key = get_option('openai_api_key');
 
     if (empty($api_key)) {
@@ -168,16 +191,8 @@ function openai_generate_preview_text($post_id)
         return;
     }
 
-    $post_content = get_post_field('post_content', $post_id);
-    $post_url = get_permalink($post_id);
-
-
-    // The API URL (modify as needed)
     $api_url = 'https://api.openai.com/v1/chat/completions';
 
-    $prompt = "Creating engaging Twitter content to summarize the following blog post content. Include some emojis. The audience are Spring developer that want to learn about testing spring boot applications. the url (' . $post_url . ') must be included at the end of the tweet. Each tweet must have a max of 280 characters not more, use maximum three hashtags. Include line breaks in the tweets. Create three different tweet variations:\n" . $post_content;
-
-    // The data you want to send
     $data = [
         'messages' => [
             [
@@ -189,7 +204,6 @@ function openai_generate_preview_text($post_id)
         'temperature' => 0.7  // Adjust creativity/variability
     ];
 
-    // API request
     $response = wp_remote_post($api_url, [
         'headers' => [
             'Authorization' => 'Bearer ' . $api_key,
@@ -198,7 +212,7 @@ function openai_generate_preview_text($post_id)
         'body' => json_encode($data),
         'method' => 'POST',
         'data_format' => 'body',
-        'timeout' => 30
+        'timeout' => 90
     ]);
 
 
@@ -212,5 +226,4 @@ function openai_generate_preview_text($post_id)
 
     return $data->choices[0]->message->content ?? 'Error: No response from API';
 }
-
 ?>
