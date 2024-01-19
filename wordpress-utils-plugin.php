@@ -8,7 +8,7 @@
  *
  * Plugin Name: WordPress Utils Plugin
  * Description: Various utility functions for WordPress.
- * Version: 1.5.0
+ * Version: 1.6.0
  * Author: Philip Riecks
  */
 
