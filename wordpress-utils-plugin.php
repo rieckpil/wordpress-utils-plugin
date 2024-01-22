@@ -95,8 +95,8 @@ function openai_add_custom_box()
 function openai_custom_box_html($post)
 {
     // Check for existing preview text
-    $post_content = get_post_field('post_content', $post->ID);
     $post_id = $post->ID;
+    $post_content = get_post_field('post_content', $post_id);
     $post_url = get_permalink($post_id);
 
     if (get_post_status($post->ID) == 'draft') {
@@ -110,7 +110,7 @@ function openai_custom_box_html($post)
     }
 
     $twitter_prompt = "Creating engaging Twitter content to summarize the following blog post content. Include some emojis. The audience are Spring developer that want to learn about testing spring boot applications. the url (' . $post_url . ') must be included at the end of the tweet. Each tweet must have a max of 280 characters not more, use maximum three hashtags. Include line breaks in the tweets. Create three different tweet variations:\n" . $post_content;
-    $newsletter_prompt = 'Please summarize the following technical blog article for my newsletter. The newsletter variation email should have around 400-600 words and summarize the technical blog article, including a CTA at the end of the email to encourage visiting the article at the given URL (' . $post_url . '). Make sure to include some bullet points, as well as text and line breaks, to make it easy for the reader to grasp. The newsletter ends with "Joyful testing, Philip".  The audience consists of Spring Boot Java developers who need help with testing their Spring Boot applications. They signed up for the blog to receive help, best practices, and testing recipes. Please include a compelling email title (including one suiting emoji) and a description of 100-120 characters. \n' . $post_content;
+    $newsletter_prompt = 'Please summarize the following technical blog article for my newsletter. The newsletter email should have around 400-600 words and summarize the technical blog article, including a CTA at the end of the email to encourage visiting the article at the given URL (' . $post_url . '). Make sure to include some bullet points, as well as text and line breaks, to make it easy for the reader to grasp. The newsletter ends with "Joyful testing, Philip".  The audience consists of Spring Boot Java developers who need help with testing their Spring Boot applications. They signed up for the blog to receive help, best practices, and testing recipes. Please include a compelling email title (including one suiting emoji) and a description of 100-120 characters. \n' . $post_content;
 
     $social_platforms = [
         ['twitter', $twitter_prompt],
@@ -125,7 +125,7 @@ function openai_custom_box_html($post)
         $preview_text = get_post_meta($post->ID, 'openai_'. $social_platform_name . '_preview_text', true);
 
         if (!$preview_text) {
-            $preview_text = openai_generate_preview_text($post_id, $social_platform_prompt);
+            $preview_text = openai_generate_preview_text($social_platform_prompt);
 
             if ($preview_text) {
                 update_post_meta($post->ID, 'openai_'. $social_platform_name . '_preview_text', $preview_text);
@@ -183,7 +183,7 @@ function delete_newsletter_preview_text_callback() {
     wp_die(); // This is required to terminate immediately and return a proper response
 }
 
-function openai_generate_preview_text($post_id, $prompt) {
+function openai_generate_preview_text($prompt) {
     $api_key = get_option('openai_api_key');
 
     if (empty($api_key)) {
