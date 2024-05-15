@@ -200,7 +200,7 @@ function openai_generate_preview_text($prompt) {
                 'content' => $prompt
             ]
         ],
-        'model' => 'gpt-4-1106-preview',
+        'model' => 'gpt-4o',
         'temperature' => 0.7  // Adjust creativity/variability
     ];
 
